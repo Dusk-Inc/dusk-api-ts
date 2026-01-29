@@ -1,8 +1,8 @@
 import express, { Express } from "express";
 import pino, { Logger, LevelWithSilent } from "pino";
 import pinoHttp from "pino-http";
-import { makeHealthRouter, ReadinessCheck } from "./routes/health/health.routes";
-import { makeMetricsRouter } from "./routes/metrics/metrics.routes";
+import { makeHealthRouter, ReadinessCheck } from "./modules/health/health.routes";
+import { makeMetricsRouter } from "./modules/metrics/metrics.routes";
 import { traceMiddleware } from "./middleware/trace";
 import { getCorrelationId } from "./modules/context/context";
 
