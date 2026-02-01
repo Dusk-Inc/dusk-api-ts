@@ -6,4 +6,4 @@ export { makeMetricsRouter } from "./modules/metrics/metrics.routes";
 export type { MetricsRouterConfig } from "./modules/metrics/metrics.routes";
 export { makeWellKnownRouter } from "./modules/well_known/well_known.routes";
 export type { DiscoveryModel, WellKnownRouterConfig } from "./modules/well_known/well_known.routes";
-export { parseEnv } from './modules/utils'
+export { parseEnv, sendNotImplemented } from './modules/utils'

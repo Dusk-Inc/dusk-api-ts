@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type Response } from "express";
 
 const envSchema = z.object({
   HOST: z.string().min(1).default("0.0.0.0"),
@@ -7,4 +8,13 @@ const envSchema = z.object({
 
 export const parseEnv = () => {
   return envSchema.parse(process.env);
+};
+
+export const sendNotImplemented = (res: Response): void => {
+  res.status(501).json({
+    error: {
+      code: "NOT_IMPLEMENTED",
+      message: "Not implemented.",
+    },
+  });
 };
