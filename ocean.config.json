@@ -5,6 +5,7 @@
     "tasks": {
         "build": "pnpm build",
         "test": "pnpm test",
-        "install": "pnpm add @dusk/dusk-api@workspace:*"
+        "install": "pnpm add @dusk/dusk-api@workspace:*",
+        "uninstall": "pnpm remove @dusk/dusk-api"
     }
 }
