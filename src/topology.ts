@@ -3,6 +3,7 @@ import pino, { Logger, LevelWithSilent } from "pino";
 import pinoHttp from "pino-http";
 import { makeHealthRouter, ReadinessCheck } from "./modules/health/health.routes";
 import { makeMetricsRouter } from "./modules/metrics/metrics.routes";
+import { auditMiddleware } from "./middleware/audit";
 import { traceMiddleware } from "./middleware/trace";
 import { getCorrelationId } from "./modules/context/context";
 
@@ -40,6 +41,7 @@ export const buildApp = (config: AppConfig): AppModel => {
       }),
     })
   );
+  app.use(auditMiddleware);
 
   app.use(express.json());
   app.use(makeHealthRouter({ readiness: config.readiness }));
