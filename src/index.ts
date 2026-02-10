@@ -8,3 +8,8 @@ export { makeWellKnownRouter } from "./modules/well_known/well_known.routes";
 export type { DiscoveryModel, WellKnownRouterConfig } from "./modules/well_known/well_known.routes";
 export { parseEnv, sendNotImplemented } from './modules/utils'
 export { auditMiddleware } from "./middleware/audit";
+export { ActorMiddleware, makeActorMiddleware } from "./middleware/actor";
+export type {
+  ActorMiddlewareErrorResponse,
+  ActorSource,
+} from "./middleware/actor";
