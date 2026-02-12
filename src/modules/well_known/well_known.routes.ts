@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import { wellKnownRoutes } from "../routes";
 
 export type DiscoveryModel = {
   id: string;
@@ -16,7 +17,7 @@ const makeOpenIdConfiguration = (
 ): Record<string, unknown> => {
   const payload: Record<string, unknown> = {
     issuer: config.issuer,
-    jwks_uri: `${config.issuer}/.well-known/jwks.json`,
+    jwks_uri: `${config.issuer}${wellKnownRoutes.jwks.path}`,
     authorization_endpoint: `${config.issuer}/authorize`,
     token_endpoint: `${config.issuer}/token`,
     userinfo_endpoint: `${config.issuer}/userinfo`,
@@ -39,11 +40,11 @@ export const makeWellKnownRouter = (
 ): Router => {
   const router = Router();
 
-  router.get("/.well-known/openid-configuration", (req: Request, res: Response) => {
+  router.get(wellKnownRoutes.openidConfiguration.path, (req: Request, res: Response) => {
     res.status(200).json(makeOpenIdConfiguration(config));
   });
 
-  router.get("/.well-known/jwks.json", (req: Request, res: Response) => {
+  router.get(wellKnownRoutes.jwks.path, (req: Request, res: Response) => {
     res.status(200).json(config.publicKeySet);
   });
 

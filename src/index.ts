@@ -6,6 +6,17 @@ export { makeMetricsRouter } from "./modules/metrics/metrics.routes";
 export type { MetricsRouterConfig } from "./modules/metrics/metrics.routes";
 export { makeWellKnownRouter } from "./modules/well_known/well_known.routes";
 export type { DiscoveryModel, WellKnownRouterConfig } from "./modules/well_known/well_known.routes";
+export {
+  API_ROUTE_METHOD,
+  healthLiveContract,
+  healthReadyContract,
+  healthRoutes,
+  metricsContract,
+  metricsRoutes,
+  wellKnownOpenIdConfigurationContract,
+  wellKnownJwksContract,
+  wellKnownRoutes,
+} from "./modules/routes";
 export { parseEnv, sendNotImplemented } from './modules/utils'
 export { auditMiddleware } from "./middleware/audit";
 export { ActorMiddleware, makeActorMiddleware } from "./middleware/actor";

@@ -4,6 +4,7 @@ import {
   Registry,
   register as defaultRegister
 } from "prom-client";
+import { metricsRoutes } from "../routes";
 
 export type MetricsRouterConfig = {
   registry?: Registry;
@@ -26,7 +27,7 @@ export const makeMetricsRouter = (config: MetricsRouterConfig = {}): Router => {
 
   ensureDefaultMetrics();
 
-  router.get("/metrics", async (req: Request, res: Response) => {
+  router.get(metricsRoutes.collect.path, async (req: Request, res: Response) => {
     const metrics = await registry.metrics();
     res.status(200);
     res.setHeader("Content-Type", registry.contentType);
