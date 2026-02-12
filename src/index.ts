@@ -18,6 +18,17 @@ export {
   wellKnownRoutes,
 } from "./modules/routes";
 export { parseEnv, sendNotImplemented } from './modules/utils'
+export {
+  makeServiceDecorator,
+  SERVICE_DECORATOR_PHASE,
+  ServiceDecoratorTransformError,
+} from "./modules/decorators";
+export type {
+  ServiceDecoratorConfig,
+  ServiceDecoratorPhase,
+  ServiceDecoratorRule,
+  ServiceMapperContext,
+} from "./modules/decorators";
 export { auditMiddleware } from "./middleware/audit";
 export { ActorMiddleware, makeActorMiddleware } from "./middleware/actor";
 export type {
