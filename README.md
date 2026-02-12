@@ -53,3 +53,95 @@ app.listen(env.PORT, env.HOST, () => {
   console.log(`listening on http://${env.HOST}:${env.PORT}`);
 });
 ```
+
+## Service Decorator Middleware (Encryption/Decryption)
+
+Use the service decorator toolkit when you need request/response transforms at a service boundary (for example, encrypt before persistence and decrypt on read).
+
+The decorator is method-aware and supports explicit mapper functions so transforms are easy to test before wiring into runtime services.
+
+### Example
+
+```ts
+import {
+  ServiceDecorator,
+  SERVICE_DECORATOR_PHASE,
+  ServiceDecoratorTransformError,
+} from "@dusk/dusk-api";
+import { mapFieldSelectors } from "@dusk/dusk-core";
+
+type Store = {
+  savePin: (
+    certId: string,
+    pin: { verifierHex: string; saltB64: string }
+  ) => Promise<{ pin: { verifierHex: string; saltB64: string } }>;
+};
+
+const encrypt = (value: string): string => `sealed:${value}`;
+const decrypt = (value: string): string => {
+  if (!value.startsWith("sealed:")) {
+    throw new Error("Invalid sealed value.");
+  }
+  return value.slice("sealed:".length);
+};
+
+const pinArgSelectors = [[1, "verifierHex"], [1, "saltB64"]] as const;
+const pinResultSelectors = [["pin", "verifierHex"], ["pin", "saltB64"]] as const;
+
+export const decorateStore = (store: Store): Store =>
+  new ServiceDecorator(store, {
+    serviceName: "certificate_data",
+    rules: [
+      {
+        methods: ["savePin"],
+        mapArgs: async (args, context) => {
+          if (context.phase !== SERVICE_DECORATOR_PHASE.Encode) {
+            throw new ServiceDecoratorTransformError({
+              phase: context.phase,
+              target: `${context.serviceName}.${context.methodName}`,
+              message: "Data transform failed.",
+            });
+          }
+          return mapFieldSelectors(args, pinArgSelectors, (value) => {
+            if (typeof value !== "string") {
+              throw new ServiceDecoratorTransformError({
+                phase: context.phase,
+                target: `${context.serviceName}.${context.methodName}`,
+                message: "Data transform failed.",
+              });
+            }
+            return encrypt(value);
+          });
+        },
+      },
+      {
+        methods: ["savePin"],
+        mapResult: async (result, context) => {
+          if (context.phase !== SERVICE_DECORATOR_PHASE.Decode) {
+            throw new ServiceDecoratorTransformError({
+              phase: context.phase,
+              target: `${context.serviceName}.${context.methodName}`,
+              message: "Data transform failed.",
+            });
+          }
+          return mapFieldSelectors(result, pinResultSelectors, (value) => {
+            if (typeof value !== "string") {
+              throw new ServiceDecoratorTransformError({
+                phase: context.phase,
+                target: `${context.serviceName}.${context.methodName}`,
+                message: "Data transform failed.",
+              });
+            }
+            return decrypt(value);
+          });
+        },
+      },
+    ],
+  }).decorate();
+```
+
+### Notes
+
+- Prefer injecting encryption/decryption logic from your app/service so crypto strategy stays app-specific.
+- Use strict typed transform errors (`ServiceDecoratorTransformError`) and avoid leaking sensitive values in error messages.
+- Use explicit selectors + mapper functions (`mapFieldSelectors`) for predictable, testable field transforms.

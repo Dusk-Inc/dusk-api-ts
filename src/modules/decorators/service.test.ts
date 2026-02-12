@@ -1,5 +1,5 @@
 import {
-  makeServiceDecorator,
+  ServiceDecorator,
   SERVICE_DECORATOR_PHASE,
   ServiceDecoratorTransformError,
 } from "./service";
@@ -18,7 +18,7 @@ describe("service_decorator", () => {
       },
     };
 
-    const decorated = makeServiceDecorator(service, {
+    const decorated = new ServiceDecorator(service, {
       serviceName: "vault",
       rules: [
         {
@@ -40,7 +40,7 @@ describe("service_decorator", () => {
           },
         },
       ],
-    });
+    }).decorate();
 
     const saved = await decorated.save({ secret: "abc", keep: "x" });
     const read = await decorated.read();
@@ -59,14 +59,14 @@ describe("service_decorator", () => {
       },
     };
 
-    const decorated = makeServiceDecorator(service, {
+    const decorated = new ServiceDecorator(service, {
       serviceName: "vault",
       rules: [
         {
           mapArgs: async () => ({ invalid: true }) as unknown[],
         },
       ],
-    });
+    }).decorate();
 
     await expect(decorated.save({ secret: "abc" })).rejects.toEqual(
       expect.objectContaining({
@@ -86,7 +86,7 @@ describe("service_decorator", () => {
       },
     };
 
-    const decorated = makeServiceDecorator(service, {
+    const decorated = new ServiceDecorator(service, {
       serviceName: "vault",
       rules: [
         {
@@ -95,7 +95,7 @@ describe("service_decorator", () => {
           },
         },
       ],
-    });
+    }).decorate();
 
     await expect(decorated.save({ secret: "abc" })).rejects.toEqual(
       expect.objectContaining({
@@ -121,7 +121,7 @@ describe("service_decorator", () => {
       message: "Data transform failed.",
     });
 
-    const decorated = makeServiceDecorator(service, {
+    const decorated = new ServiceDecorator(service, {
       serviceName: "vault",
       rules: [
         {
@@ -130,7 +130,7 @@ describe("service_decorator", () => {
           },
         },
       ],
-    });
+    }).decorate();
 
     await expect(decorated.save({ secret: "abc" })).rejects.toBe(typed);
   });

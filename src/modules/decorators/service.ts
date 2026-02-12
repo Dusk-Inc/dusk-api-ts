@@ -48,120 +48,113 @@ export type ServiceDecoratorConfig = {
 
 const safeErrorMessage = "Data transform failed.";
 
-const shouldApplyRule = (rule: ServiceDecoratorRule, methodName: string): boolean => {
-  if (!rule.methods || rule.methods.length === 0) {
-    return true;
+export class ServiceDecorator<TService extends object> {
+  private readonly service: TService;
+  private readonly serviceName: string;
+  private readonly rules: ServiceDecoratorRule[];
+
+  constructor(service: TService, config: ServiceDecoratorConfig) {
+    this.service = service;
+    this.serviceName = config.serviceName ?? "service";
+    this.rules = config.rules;
   }
-  return rule.methods.includes(methodName);
-};
 
-const ensureArgsArray = (
-  value: unknown,
-  context: ServiceMapperContext
-): unknown[] => {
-  if (Array.isArray(value)) {
-    return value;
+  decorate(): TService {
+    return new Proxy(this.service, {
+      get: (target, propertyKey, receiver) => {
+        const member = Reflect.get(target, propertyKey, receiver);
+        if (typeof member !== "function") {
+          return member;
+        }
+
+        return async (...args: unknown[]) => {
+          const methodName = String(propertyKey);
+          const mappedArgs = await this.mapCallArgs(args, methodName);
+          const result = await member.apply(target, mappedArgs);
+          return this.mapCallResult(result, methodName);
+        };
+      },
+    });
   }
-  throw new ServiceDecoratorTransformError({
-    phase: context.phase,
-    target: `${context.serviceName}.${context.methodName}`,
-    message: safeErrorMessage,
-  });
-};
 
-const wrapTransformError = (
-  error: unknown,
-  context: ServiceMapperContext
-): ServiceDecoratorTransformError => {
-  if (error instanceof ServiceDecoratorTransformError) {
-    return error;
-  }
-  return new ServiceDecoratorTransformError({
-    phase: context.phase,
-    target: `${context.serviceName}.${context.methodName}`,
-    message: safeErrorMessage,
-  });
-};
-
-const mapCallArgs = async (
-  args: unknown[],
-  methodName: string,
-  serviceName: string,
-  rules: ServiceDecoratorRule[]
-): Promise<unknown[]> => {
-  let nextArgs = args;
-
-  for (const rule of rules) {
-    if (!shouldApplyRule(rule, methodName) || !rule.mapArgs) {
-      continue;
+  private shouldApplyRule(rule: ServiceDecoratorRule, methodName: string): boolean {
+    if (!rule.methods || rule.methods.length === 0) {
+      return true;
     }
-
-    const context: ServiceMapperContext = {
-      serviceName,
-      methodName,
-      phase: SERVICE_DECORATOR_PHASE.Encode,
-    };
-
-    try {
-      const mapped = await rule.mapArgs(nextArgs, context);
-      nextArgs = ensureArgsArray(mapped, context);
-    } catch (error) {
-      throw wrapTransformError(error, context);
-    }
+    return rule.methods.includes(methodName);
   }
 
-  return nextArgs;
-};
-
-const mapCallResult = async (
-  result: unknown,
-  methodName: string,
-  serviceName: string,
-  rules: ServiceDecoratorRule[]
-): Promise<unknown> => {
-  let nextResult = result;
-
-  for (const rule of rules) {
-    if (!shouldApplyRule(rule, methodName) || !rule.mapResult) {
-      continue;
+  private ensureArgsArray(value: unknown, context: ServiceMapperContext): unknown[] {
+    if (Array.isArray(value)) {
+      return value;
     }
-
-    const context: ServiceMapperContext = {
-      serviceName,
-      methodName,
-      phase: SERVICE_DECORATOR_PHASE.Decode,
-    };
-
-    try {
-      nextResult = await rule.mapResult(nextResult, context);
-    } catch (error) {
-      throw wrapTransformError(error, context);
-    }
+    throw new ServiceDecoratorTransformError({
+      phase: context.phase,
+      target: `${context.serviceName}.${context.methodName}`,
+      message: safeErrorMessage,
+    });
   }
 
-  return nextResult;
-};
+  private wrapTransformError(
+    error: unknown,
+    context: ServiceMapperContext
+  ): ServiceDecoratorTransformError {
+    if (error instanceof ServiceDecoratorTransformError) {
+      return error;
+    }
+    return new ServiceDecoratorTransformError({
+      phase: context.phase,
+      target: `${context.serviceName}.${context.methodName}`,
+      message: safeErrorMessage,
+    });
+  }
 
-export const makeServiceDecorator = <TService extends object>(
-  service: TService,
-  config: ServiceDecoratorConfig
-): TService => {
-  const serviceName = config.serviceName ?? "service";
-  const rules = config.rules;
+  private async mapCallArgs(args: unknown[], methodName: string): Promise<unknown[]> {
+    let nextArgs = args;
 
-  return new Proxy(service, {
-    get(target, propertyKey, receiver) {
-      const member = Reflect.get(target, propertyKey, receiver);
-      if (typeof member !== "function") {
-        return member;
+    for (const rule of this.rules) {
+      if (!this.shouldApplyRule(rule, methodName) || !rule.mapArgs) {
+        continue;
       }
 
-      return async (...args: unknown[]) => {
-        const methodName = String(propertyKey);
-        const mappedArgs = await mapCallArgs(args, methodName, serviceName, rules);
-        const result = await member.apply(target, mappedArgs);
-        return mapCallResult(result, methodName, serviceName, rules);
+      const context: ServiceMapperContext = {
+        serviceName: this.serviceName,
+        methodName,
+        phase: SERVICE_DECORATOR_PHASE.Encode,
       };
-    },
-  });
-};
+
+      try {
+        const mapped = await rule.mapArgs(nextArgs, context);
+        nextArgs = this.ensureArgsArray(mapped, context);
+      } catch (error) {
+        throw this.wrapTransformError(error, context);
+      }
+    }
+
+    return nextArgs;
+  }
+
+  private async mapCallResult(result: unknown, methodName: string): Promise<unknown> {
+    let nextResult = result;
+
+    for (const rule of this.rules) {
+      if (!this.shouldApplyRule(rule, methodName) || !rule.mapResult) {
+        continue;
+      }
+
+      const context: ServiceMapperContext = {
+        serviceName: this.serviceName,
+        methodName,
+        phase: SERVICE_DECORATOR_PHASE.Decode,
+      };
+
+      try {
+        nextResult = await rule.mapResult(nextResult, context);
+      } catch (error) {
+        throw this.wrapTransformError(error, context);
+      }
+    }
+
+    return nextResult;
+  }
+}

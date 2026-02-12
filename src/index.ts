@@ -19,7 +19,7 @@ export {
 } from "./modules/routes";
 export { parseEnv, sendNotImplemented } from './modules/utils'
 export {
-  makeServiceDecorator,
+  ServiceDecorator,
   SERVICE_DECORATOR_PHASE,
   ServiceDecoratorTransformError,
 } from "./modules/decorators";
