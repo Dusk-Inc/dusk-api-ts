@@ -145,3 +145,37 @@ export const decorateStore = (store: Store): Store =>
 - Prefer injecting encryption/decryption logic from your app/service so crypto strategy stays app-specific.
 - Use strict typed transform errors (`ServiceDecoratorTransformError`) and avoid leaking sensitive values in error messages.
 - Use explicit selectors + mapper functions (`mapFieldSelectors`) for predictable, testable field transforms.
+
+## Secret Manager (Vault Agent File + Env Merge)
+
+Use `SecretManager` when a service reads secrets from a mounted file (for example Vault Agent output) and needs rotation-aware updates without restarting.
+
+```ts
+import { SecretManager } from "@dusk/dusk-api";
+
+const secrets = new SecretManager({
+  secretPathEnvVar: "DUSK_SECRETS_FILE",
+  secretPathDefault: "/var/run/secrets/dusk/secrets.env",
+  requireReadOnlyFile: true,
+});
+
+await secrets.loadSecrets();
+await secrets.startWatching();
+
+const dbUser = secrets.getRequiredSecret("DB_USER");
+const dbPass = secrets.getRequiredSecret("DB_PASS");
+
+const unsubscribe = secrets.onRotate((rotation) => {
+  // Use rotation keys to decide which clients/pools to refresh.
+  console.log("secret generation", rotation.generation, rotation.updatedKeys);
+});
+
+// Later during shutdown:
+unsubscribe();
+secrets.stopWatching();
+```
+
+Notes:
+- Environment variables always override file values.
+- Rotation events expose key names only (no secret values).
+- Missing file falls back to environment-only mode.

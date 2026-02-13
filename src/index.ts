@@ -35,3 +35,12 @@ export type {
   ActorMiddlewareErrorResponse,
   ActorSource,
 } from "./middleware/actor";
+export {
+  SecretManager,
+} from "./modules/secrets";
+export type {
+  SecretSnapshot,
+  SecretRotation,
+  SecretLogger,
+  SecretManagerOptions,
+} from "./modules/secrets";
