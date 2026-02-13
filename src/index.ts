@@ -1,3 +1,5 @@
+import "./other/express";
+
 export * from "./modules";
 export * from "./functions";
 export * from "./contracts";
