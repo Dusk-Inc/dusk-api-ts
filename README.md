@@ -1,18 +1,34 @@
-# Base API (TypeScript)
+# Dusk API (TypeScript)
 
-Shared Express base for Dusk services. Provides standard middleware, health checks, and metrics.
+Shared Express runtime and API utilities for Dusk services.
 
-## Usage
+## Install
 
-1. Add to an app package.json as a workspace dependency: `"@dusk/dusk-api": "workspace:*"`.
-2. Create a server entrypoint that builds the app and starts listening.
+Add as a workspace dependency:
 
-## Example
+```json
+{
+  "dependencies": {
+    "@dusk/dusk-api": "workspace:*"
+  }
+}
+```
+
+## Current Structure
+
+- `src/modules`: runtime and middleware modules (`AppManager`, `SecretManager`, `ServiceDecorator`, `auditMiddleware`, `WellKnownRouter`)
+- `src/routes`: route routers (`HealthRouter`, `MetricsRouter`)
+- `src/contracts`: shared type contracts and route contracts
+- `src/functions`: pure helpers (`parseEnv`, `sendNotImplemented`, secret parsing helpers, actor helpers, trace middleware helper)
+- `src/tokens`: constants and tokenized route definitions for health/metrics and runtime tokens
+
+## Quick Start
 
 ```ts
-import { buildApp, parseEnv } from "@dusk/dusk-api";
+import { AppManager, parseEnv } from "@dusk/dusk-api";
 
-const { app } = buildApp({ serviceName: "my-service" });
+const api = new AppManager({ serviceName: "my-service" });
+const { app } = api;
 const env = parseEnv();
 
 app.listen(env.PORT, env.HOST, () => {
@@ -20,162 +36,89 @@ app.listen(env.PORT, env.HOST, () => {
 });
 ```
 
-## Custom Middleware & Routes
+## App Manager + Runtime
+
+```ts
+import { AppManager } from "@dusk/dusk-api";
+
+const api = new AppManager({ serviceName: "my-service" });
+api.secrets.use();
+await api.startRuntime();
+
+const app = api.app;
+```
+
+Notes:
+- Runtime plugins are lifecycle-managed by `RuntimeManager`.
+- `SecretsPlugin` is integrated via `api.secrets.use(...)`.
+
+## Routers
+
+`HealthRouter` and `MetricsRouter` are class-based routers exported from the package root.
 
 ```ts
 import express from "express";
-import { buildApp, parseEnv } from "@dusk/dusk-api";
+import { HealthRouter, MetricsRouter } from "@dusk/dusk-api";
 
-const { app } = buildApp({ serviceName: "my-service" });
-const env = parseEnv();
-
-app.use((req, res, next) => {
-  res.setHeader("x-service", "my-service");
-  next();
-});
-
-const router = express.Router();
-router.get("/status", (req, res) => {
-  res.status(200).json({ data: { status: "ok" } });
-});
-app.use(router);
-
-app.use((req, res) => {
-  res.status(404).json({
-    error: {
-      code: "NOT_FOUND",
-      message: "Route not found.",
-    },
-  });
-});
-
-app.listen(env.PORT, env.HOST, () => {
-  console.log(`listening on http://${env.HOST}:${env.PORT}`);
-});
+const app = express();
+app.use(new HealthRouter().router);
+app.use(new MetricsRouter().router);
 ```
 
-## Service Decorator Middleware (Encryption/Decryption)
-
-Use the service decorator toolkit when you need request/response transforms at a service boundary (for example, encrypt before persistence and decrypt on read).
-
-The decorator is method-aware and supports explicit mapper functions so transforms are easy to test before wiring into runtime services.
-
-### Example
+`WellKnownRouter` is in `modules` and uses well-known route contracts from `contracts/well_known.ts`.
 
 ```ts
-import {
-  ServiceDecorator,
-  SERVICE_DECORATOR_PHASE,
-  ServiceDecoratorTransformError,
-} from "@dusk/dusk-api";
-import { mapFieldSelectors } from "@dusk/dusk-core";
+import express from "express";
+import { WellKnownRouter } from "@dusk/dusk-api";
 
-type Store = {
-  savePin: (
-    certId: string,
-    pin: { verifierHex: string; saltB64: string }
-  ) => Promise<{ pin: { verifierHex: string; saltB64: string } }>;
-};
-
-const encrypt = (value: string): string => `sealed:${value}`;
-const decrypt = (value: string): string => {
-  if (!value.startsWith("sealed:")) {
-    throw new Error("Invalid sealed value.");
-  }
-  return value.slice("sealed:".length);
-};
-
-const pinArgSelectors = [[1, "verifierHex"], [1, "saltB64"]] as const;
-const pinResultSelectors = [["pin", "verifierHex"], ["pin", "saltB64"]] as const;
-
-export const decorateStore = (store: Store): Store =>
-  new ServiceDecorator(store, {
-    serviceName: "certificate_data",
-    rules: [
-      {
-        methods: ["savePin"],
-        mapArgs: async (args, context) => {
-          if (context.phase !== SERVICE_DECORATOR_PHASE.Encode) {
-            throw new ServiceDecoratorTransformError({
-              phase: context.phase,
-              target: `${context.serviceName}.${context.methodName}`,
-              message: "Data transform failed.",
-            });
-          }
-          return mapFieldSelectors(args, pinArgSelectors, (value) => {
-            if (typeof value !== "string") {
-              throw new ServiceDecoratorTransformError({
-                phase: context.phase,
-                target: `${context.serviceName}.${context.methodName}`,
-                message: "Data transform failed.",
-              });
-            }
-            return encrypt(value);
-          });
-        },
-      },
-      {
-        methods: ["savePin"],
-        mapResult: async (result, context) => {
-          if (context.phase !== SERVICE_DECORATOR_PHASE.Decode) {
-            throw new ServiceDecoratorTransformError({
-              phase: context.phase,
-              target: `${context.serviceName}.${context.methodName}`,
-              message: "Data transform failed.",
-            });
-          }
-          return mapFieldSelectors(result, pinResultSelectors, (value) => {
-            if (typeof value !== "string") {
-              throw new ServiceDecoratorTransformError({
-                phase: context.phase,
-                target: `${context.serviceName}.${context.methodName}`,
-                message: "Data transform failed.",
-              });
-            }
-            return decrypt(value);
-          });
-        },
-      },
-    ],
-  }).decorate();
+const app = express();
+app.use(
+  new WellKnownRouter({
+    issuer: "https://issuer.example.com",
+    publicKeySet: { keys: [] },
+  }).router
+);
 ```
 
-### Notes
+## Service Decorator
 
-- Prefer injecting encryption/decryption logic from your app/service so crypto strategy stays app-specific.
-- Use strict typed transform errors (`ServiceDecoratorTransformError`) and avoid leaking sensitive values in error messages.
-- Use explicit selectors + mapper functions (`mapFieldSelectors`) for predictable, testable field transforms.
+```ts
+import { ServiceDecorator, SERVICE_DECORATOR_PHASE } from "@dusk/dusk-api";
 
-## Secret Manager (Vault Agent File + Env Merge)
+const decorated = new ServiceDecorator(service, {
+  serviceName: "example-service",
+  rules: [
+    {
+      methods: ["save"],
+      mapArgs: async (args, context) => {
+        if (context.phase !== SERVICE_DECORATOR_PHASE.Encode) return args;
+        return args;
+      },
+      mapResult: async (result, context) => {
+        if (context.phase !== SERVICE_DECORATOR_PHASE.Decode) return result;
+        return result;
+      },
+    },
+  ],
+}).decorate();
+```
 
-Use `SecretManager` when a service reads secrets from a mounted file (for example Vault Agent output) and needs rotation-aware updates without restarting.
+## Secrets
 
 ```ts
 import { SecretManager } from "@dusk/dusk-api";
 
-const secrets = new SecretManager({
+const manager = new SecretManager({
   secretPathEnvVar: "DUSK_SECRETS_FILE",
   secretPathDefault: "/var/run/secrets/dusk/secrets.env",
   requireReadOnlyFile: true,
 });
 
-await secrets.loadSecrets();
-await secrets.startWatching();
-
-const dbUser = secrets.getRequiredSecret("DB_USER");
-const dbPass = secrets.getRequiredSecret("DB_PASS");
-
-const unsubscribe = secrets.onRotate((rotation) => {
-  // Use rotation keys to decide which clients/pools to refresh.
-  console.log("secret generation", rotation.generation, rotation.updatedKeys);
-});
-
-// Later during shutdown:
-unsubscribe();
-secrets.stopWatching();
+await manager.loadSecrets();
+await manager.startWatching();
 ```
 
 Notes:
-- Environment variables always override file values.
-- Rotation events expose key names only (no secret values).
-- Missing file falls back to environment-only mode.
+- file values are merged with environment values
+- environment values take precedence
+- rotation events expose keys and generation metadata (not secret values)
