@@ -1,4 +1,4 @@
-import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdtemp, rm, utimes, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { SecretManager } from "./secrets";
@@ -152,5 +152,54 @@ describe("secret_manager", () => {
       manager?.stopWatching();
       await rm(dir, { recursive: true, force: true });
     }
+  });
+
+  test("complement__ensure_fresh_secrets_file__throws_when_file_is_missing_and_required", async () => {
+    const manager = new SecretManager({
+      env: {
+        DUSK_SECRETS_FILE: "/tmp/does-not-exist.env",
+        DUSK_SECRETS_REQUIRE_FILE: "true",
+      },
+      requireReadOnlyFile: false,
+    });
+
+    await expect(manager.ensureFreshSecretsFile()).rejects.toThrow(
+      "Required secrets file is missing"
+    );
+  });
+
+  test("boundary__ensure_fresh_secrets_file__throws_when_file_is_stale", async () => {
+    const { dir, filePath } = await makeTempSecretsFile("DB_USER=file-user");
+
+    try {
+      const oldDate = new Date(Date.now() - 10 * 60 * 1000);
+      await utimes(filePath, oldDate, oldDate);
+      const manager = new SecretManager({
+        env: {
+          DUSK_SECRETS_FILE: filePath,
+          DUSK_SECRETS_REQUIRE_FILE: "true",
+          DUSK_SECRETS_MAX_AGE_SEC: "60",
+        },
+        requireReadOnlyFile: false,
+      });
+
+      await expect(manager.ensureFreshSecretsFile()).rejects.toThrow(
+        "Secrets file is stale"
+      );
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("domain__ensure_fresh_secrets_file__skips_when_require_file_is_false", async () => {
+    const manager = new SecretManager({
+      env: {
+        DUSK_SECRETS_FILE: "/tmp/does-not-exist.env",
+        DUSK_SECRETS_REQUIRE_FILE: "false",
+      },
+      requireReadOnlyFile: false,
+    });
+
+    await expect(manager.ensureFreshSecretsFile()).resolves.toBeUndefined();
   });
 });

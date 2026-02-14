@@ -1,4 +1,4 @@
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, stat } from "node:fs/promises";
 import { constants, watch, type FSWatcher } from "node:fs";
 import path from "node:path";
 import { ERROR_CODE, ErrorModel } from "../../../dusk-core-ts/dist/index.js";
@@ -88,6 +88,37 @@ export class SecretManager {
 
   async loadSecrets(): Promise<SecretSnapshot> {
     return this.refreshSecrets();
+  }
+
+  async ensureFreshSecretsFile(): Promise<void> {
+    const snapshot = this.snapshot.generation > 0 ? this.snapshot : await this.loadSecrets();
+    const secrets = snapshot.values;
+    const requireFile = (secrets.DUSK_SECRETS_REQUIRE_FILE ?? "true").toLowerCase() === "true";
+    if (!requireFile) {
+      return;
+    }
+
+    const secretPath = resolveSecretPath(this.env, this.secretPathEnvVar, this.secretPathDefault);
+    let fileStats;
+    try {
+      fileStats = await stat(secretPath);
+    } catch {
+      throw new ErrorModel(
+        ERROR_CODE.DependencyFailure,
+        `Required secrets file is missing: ${secretPath}.`
+      );
+    }
+
+    const parsedMaxAge = Number.parseInt(secrets.DUSK_SECRETS_MAX_AGE_SEC ?? "300", 10);
+    const maxAgeSec = Number.isFinite(parsedMaxAge) && parsedMaxAge > 0 ? parsedMaxAge : 300;
+    const ageSec = Math.floor((Date.now() - fileStats.mtimeMs) / 1000);
+
+    if (ageSec > maxAgeSec) {
+      throw new ErrorModel(
+        ERROR_CODE.DependencyFailure,
+        `Secrets file is stale (${ageSec}s old): ${secretPath}.`
+      );
+    }
   }
 
   async refreshSecrets(): Promise<SecretSnapshot> {
