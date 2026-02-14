@@ -1,3 +1,4 @@
+import { ERROR_CODE, ErrorModel } from "../../../dusk-core-ts/dist/index.js";
 import {
   SERVICE_DECORATOR_PHASE,
   SERVICE_DECORATOR_SAFE_ERROR_MESSAGE,
@@ -20,13 +21,13 @@ export type {
 } from "../contracts";
 export type { ServiceDecoratorPhase, ServiceMapperContext } from "../contracts";
 
-export class ServiceDecoratorTransformError extends Error {
-  readonly code = SERVICE_DECORATOR_TRANSFORM_ERROR_CODE;
+export class ServiceDecoratorTransformError extends ErrorModel {
+  override readonly code = SERVICE_DECORATOR_TRANSFORM_ERROR_CODE;
   readonly phase: ServiceDecoratorPhase;
   readonly target: string;
 
   constructor(input: ServiceDecoratorTransformErrorInput) {
-    super(input.message);
+    super(ERROR_CODE.InvalidInput, input.message);
     this.name = "ServiceDecoratorTransformError";
     this.phase = input.phase;
     this.target = input.target;

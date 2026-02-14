@@ -1,3 +1,4 @@
+import { ERROR_CODE, ErrorModel } from "../../../dusk-core-ts/dist/index.js";
 import type { Logger } from "pino";
 import type { RuntimePlugin, RuntimePluginContext } from "../contracts";
 
@@ -18,12 +19,18 @@ export class RuntimeManager {
 
   use(plugin: RuntimePlugin): this {
     if (this.started) {
-      throw new Error("Cannot register runtime plugin after startup.");
+      throw new ErrorModel(
+        ERROR_CODE.Conflict,
+        "Cannot register runtime plugin after startup."
+      );
     }
 
     const exists = this.plugins.some((item) => item.id === plugin.id);
     if (exists) {
-      throw new Error(`Runtime plugin already registered: ${plugin.id}`);
+      throw new ErrorModel(
+        ERROR_CODE.Conflict,
+        `Runtime plugin already registered: ${plugin.id}`
+      );
     }
 
     this.plugins.push(plugin);

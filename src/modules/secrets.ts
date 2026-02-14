@@ -1,6 +1,7 @@
 import { access, readFile } from "node:fs/promises";
 import { constants, watch, type FSWatcher } from "node:fs";
 import path from "node:path";
+import { ERROR_CODE, ErrorModel } from "../../../dusk-core-ts/dist/index.js";
 import {
   areSecretMapsEqual,
   buildRotation,
@@ -69,7 +70,7 @@ export class SecretManager {
   getRequiredSecret(key: string): string {
     const value = this.getSecret(key);
     if (!value) {
-      throw new Error(`Required secret is missing: ${key}.`);
+      throw new ErrorModel(ERROR_CODE.NotFound, `Required secret is missing: ${key}.`);
     }
     return value;
   }
@@ -195,7 +196,8 @@ export class SecretManager {
   private async ensureReadOnly(secretPath: string): Promise<void> {
     try {
       await access(secretPath, constants.W_OK);
-      throw new Error(
+      throw new ErrorModel(
+        ERROR_CODE.Forbidden,
         `Secrets file is writable by the current process: ${secretPath}. Expected read-only.`
       );
     } catch (error) {
