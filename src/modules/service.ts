@@ -3,23 +3,23 @@ import {
   SERVICE_DECORATOR_PHASE,
   SERVICE_DECORATOR_SAFE_ERROR_MESSAGE,
   SERVICE_DECORATOR_TRANSFORM_ERROR_CODE,
-} from "../tokens";
+} from "../tokens/index.js";
 import type {
   ServiceDecoratorConfig,
   ServiceDecoratorRule,
-} from "../contracts";
+} from "../contracts/index.js";
 import type {
   ServiceDecoratorPhase,
   ServiceMapperContext,
   ServiceDecoratorTransformErrorInput,
-} from "../contracts";
+} from "../contracts/index.js";
 
-export { SERVICE_DECORATOR_PHASE } from "../tokens";
+export { SERVICE_DECORATOR_PHASE } from "../tokens/index.js";
 export type {
   ServiceDecoratorConfig,
   ServiceDecoratorRule,
-} from "../contracts";
-export type { ServiceDecoratorPhase, ServiceMapperContext } from "../contracts";
+} from "../contracts/index.js";
+export type { ServiceDecoratorPhase, ServiceMapperContext } from "../contracts/index.js";
 
 export class ServiceDecoratorTransformError extends ErrorModel {
   override readonly code = SERVICE_DECORATOR_TRANSFORM_ERROR_CODE;

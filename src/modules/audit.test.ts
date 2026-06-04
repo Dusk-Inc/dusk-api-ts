@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { auditMiddleware } from "./audit";
+import { auditMiddleware } from "./audit.js";
 
 describe("audit_middleware", () => {
   it("domain__correlation_header__attaches_trace_and_logs_with_trace", () => {

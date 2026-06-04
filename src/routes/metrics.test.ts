@@ -1,7 +1,7 @@
 import express from "express";
 import { Gauge, Registry } from "prom-client";
 import request from "supertest";
-import { MetricsRouter } from "./metrics";
+import { MetricsRouter } from "./metrics.js";
 
 const buildApp = (registry?: Registry) => {
   const app = express();

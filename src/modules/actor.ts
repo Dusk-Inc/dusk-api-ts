@@ -3,24 +3,24 @@ import {
   readActorField,
   sendMissingActor,
   makeMissingActorPayload,
-} from "../functions";
+} from "../functions/index.js";
 import type {
   ActorReader,
   MissingActorHandler,
-} from "../contracts";
+} from "../contracts/index.js";
 import type {
   ActorMiddlewareErrorResponse,
   ActorSource,
-} from "../contracts";
+} from "../contracts/index.js";
 import {
   ACTOR_DEFAULT_MISSING_CODE,
   ACTOR_DEFAULT_MISSING_MESSAGE,
   ACTOR_DEFAULT_MISSING_STATUS_CODE,
   ACTOR_DEFAULT_REQUIRED,
   ACTOR_DEFAULT_SOURCE,
-} from "../tokens";
+} from "../tokens/index.js";
 
-export type { ActorMiddlewareErrorResponse, ActorSource } from "../contracts";
+export type { ActorMiddlewareErrorResponse, ActorSource } from "../contracts/index.js";
 
 export class ActorMiddleware {
   private readonly field: string;

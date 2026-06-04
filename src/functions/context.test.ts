@@ -1,4 +1,4 @@
-import { getCorrelationId, storage } from "./context";
+import { getCorrelationId, storage } from "./context.js";
 
 const buildContext = (correlationId: string) => {
   return { correlationId };

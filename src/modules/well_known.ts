@@ -1,8 +1,8 @@
 import { Router, Request, Response } from "express";
-import { wellKnownRoutes } from "../contracts";
-import { makeOpenIdConfiguration } from "../functions";
-import type { DiscoveryModel, WellKnownRouterConfig } from "../contracts";
-export type { DiscoveryModel, WellKnownRouterConfig } from "../contracts";
+import { wellKnownRoutes } from "../contracts/index.js";
+import { makeOpenIdConfiguration } from "../functions/index.js";
+import type { DiscoveryModel, WellKnownRouterConfig } from "../contracts/index.js";
+export type { DiscoveryModel, WellKnownRouterConfig } from "../contracts/index.js";
 
 export class WellKnownRouter {
   public readonly router: Router;

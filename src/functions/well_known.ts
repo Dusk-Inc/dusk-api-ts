@@ -1,5 +1,5 @@
-import { wellKnownRoutes } from "../contracts";
-import type { WellKnownRouterConfig } from "../contracts";
+import { wellKnownRoutes } from "../contracts/index.js";
+import type { WellKnownRouterConfig } from "../contracts/index.js";
 
 export const makeOpenIdConfiguration = (
   config: WellKnownRouterConfig

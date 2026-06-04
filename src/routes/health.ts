@@ -1,9 +1,9 @@
 import { Router, Request, Response } from "express";
-import { healthRoutes } from "../tokens";
-import type { ReadinessCheck } from "../contracts";
-import type { HealthRouterConfig } from "../contracts";
-export type { ReadinessCheck } from "../contracts";
-export type { HealthRouterConfig } from "../contracts";
+import { healthRoutes } from "../tokens/index.js";
+import type { ReadinessCheck } from "../contracts/index.js";
+import type { HealthRouterConfig } from "../contracts/index.js";
+export type { ReadinessCheck } from "../contracts/index.js";
+export type { HealthRouterConfig } from "../contracts/index.js";
 
 const okPayload = { data: { status: "ok" } };
 

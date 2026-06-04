@@ -6,7 +6,7 @@ import {
   RuntimeManager,
   SecretsPlugin,
   RUNTIME_DEPENDENCY_SECRETS_ENV,
-} from "./index";
+} from "./index.js";
 
 describe("runtime_manager", () => {
   test("domain__runtime_manager__starts_and_stops_plugins_in_order", async () => {

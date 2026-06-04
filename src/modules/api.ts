@@ -1,26 +1,26 @@
-import express from "express";
+import express, { type Express } from "express";
 import pino from "pino";
 import pinoHttp from "pino-http";
-import { HealthRouter } from "../routes/health";
-import { MetricsRouter } from "../routes/metrics";
-import { auditMiddleware } from "./audit";
-import { traceMiddleware } from "../functions/trace";
-import { getCorrelationId } from "../functions/context";
-import { RuntimeManager } from "./runtime_manager";
-import { SecretsPlugin } from "./secrets_plugin";
-import type { RuntimePlugin } from "../contracts";
-import type { SecretManager, SecretManagerOptions, SecretSnapshot } from "./secrets";
+import { HealthRouter } from "../routes/health.js";
+import { MetricsRouter } from "../routes/metrics.js";
+import { auditMiddleware } from "./audit.js";
+import { traceMiddleware } from "../functions/trace.js";
+import { getCorrelationId } from "../functions/context.js";
+import { RuntimeManager } from "./runtime_manager.js";
+import { SecretsPlugin } from "./secrets_plugin.js";
+import type { RuntimePlugin } from "../contracts/index.js";
+import type { SecretManager, SecretManagerOptions, SecretSnapshot } from "./secrets.js";
 import type {
   AppManagerConfig,
-} from "../contracts";
+} from "../contracts/index.js";
 import {
   RUNTIME_DEPENDENCY_SECRETS_ENV,
   RUNTIME_DEPENDENCY_SECRETS_MANAGER,
   RUNTIME_DEPENDENCY_SECRETS_SNAPSHOT,
-} from "../tokens";
+} from "../tokens/index.js";
 
 export class AppManager {
-  readonly app = express();
+  readonly app: Express = express();
   readonly logger;
   readonly runtime;
 

@@ -3,9 +3,9 @@ import {
   collectDefaultMetrics,
   register as defaultRegister
 } from "prom-client";
-import { metricsRoutes } from "../tokens";
-import type { MetricsRouterConfig } from "../contracts";
-export type { MetricsRouterConfig } from "../contracts";
+import { metricsRoutes } from "../tokens/index.js";
+import type { MetricsRouterConfig } from "../contracts/index.js";
+export type { MetricsRouterConfig } from "../contracts/index.js";
 
 let defaultMetricsStarted = false;
 

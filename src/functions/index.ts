@@ -2,8 +2,8 @@ export {
   readActorField,
   sendMissingActor,
   makeMissingActorPayload,
-} from "./actor";
-export { parseEnv, sendNotImplemented } from "./env";
+} from "./actor.js";
+export { parseEnv, sendNotImplemented } from "./env.js";
 export {
   parseSecretLine,
   parseSecretsFile,
@@ -13,5 +13,5 @@ export {
   resolveSecretPath,
   isMissingFileError,
   isPermissionDeniedError,
-} from "./secrets";
-export { makeOpenIdConfiguration } from "./well_known";
+} from "./secrets.js";
+export { makeOpenIdConfiguration } from "./well_known.js";

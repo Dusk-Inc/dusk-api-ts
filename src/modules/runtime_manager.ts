@@ -1,6 +1,6 @@
 import { ERROR_CODE, ErrorModel } from "../../../dusk-core-ts/dist/index.js";
 import type { Logger } from "pino";
-import type { RuntimePlugin, RuntimePluginContext } from "../contracts";
+import type { RuntimePlugin, RuntimePluginContext } from "../contracts/index.js";
 
 export class RuntimeManager {
   private readonly logger: Logger;

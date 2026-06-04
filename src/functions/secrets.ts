@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { SecretRotation } from "../contracts";
+import type { SecretRotation } from "../contracts/index.js";
 
 export const parseSecretLine = (line: string): [string, string] | undefined => {
   const trimmed = line.trim();

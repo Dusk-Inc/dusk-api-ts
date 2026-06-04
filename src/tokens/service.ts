@@ -1,4 +1,4 @@
-import type { ServiceDecoratorPhase } from "../contracts";
+import type { ServiceDecoratorPhase } from "../contracts/index.js";
 
 export const SERVICE_DECORATOR_PHASE = {
   Encode: "encode",

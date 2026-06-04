@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { ActorMiddleware } from "./actor";
+import { ActorMiddleware } from "./actor.js";
 
 describe("make_actor_middleware", () => {
   it("domain__header_field_present__sets_actor_and_calls_next", () => {

@@ -2,7 +2,7 @@ import {
   ServiceDecorator,
   SERVICE_DECORATOR_PHASE,
   ServiceDecoratorTransformError,
-} from "./service";
+} from "./service.js";
 
 describe("service_decorator", () => {
   test("domain__method_rule__maps_args_and_result_for_target_method", async () => {

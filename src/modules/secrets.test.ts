@@ -1,7 +1,7 @@
 import { chmod, mkdtemp, rm, utimes, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { SecretManager } from "./secrets";
+import { SecretManager } from "./secrets.js";
 
 const makeTempSecretsFile = async (content: string): Promise<{ dir: string; filePath: string }> => {
   const dir = await mkdtemp(join(tmpdir(), "dusk-secrets-"));

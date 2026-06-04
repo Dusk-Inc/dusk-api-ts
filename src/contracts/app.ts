@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import type { Logger, LevelWithSilent } from "pino";
-import type { ReadinessCheck } from "./health";
+import type { ReadinessCheck } from "./health.js";
 
 export type AppManagerConfig = {
   serviceName: string;

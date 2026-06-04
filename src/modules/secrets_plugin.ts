@@ -1,17 +1,17 @@
-import type { RuntimePlugin, RuntimePluginContext } from "../contracts";
-import { SecretManager, type SecretManagerOptions, type SecretSnapshot } from "./secrets";
+import type { RuntimePlugin, RuntimePluginContext } from "../contracts/index.js";
+import { SecretManager, type SecretManagerOptions, type SecretSnapshot } from "./secrets.js";
 import {
   RUNTIME_PLUGIN_SECRETS,
   RUNTIME_DEPENDENCY_SECRETS_MANAGER,
   RUNTIME_DEPENDENCY_SECRETS_SNAPSHOT,
   RUNTIME_DEPENDENCY_SECRETS_ENV,
-} from "../tokens";
+} from "../tokens/index.js";
 export {
   RUNTIME_PLUGIN_SECRETS,
   RUNTIME_DEPENDENCY_SECRETS_MANAGER,
   RUNTIME_DEPENDENCY_SECRETS_SNAPSHOT,
   RUNTIME_DEPENDENCY_SECRETS_ENV,
-} from "../tokens";
+} from "../tokens/index.js";
 
 export class SecretsPlugin implements RuntimePlugin {
   readonly id = RUNTIME_PLUGIN_SECRETS;

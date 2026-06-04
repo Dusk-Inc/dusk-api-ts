@@ -4,7 +4,7 @@ export {
   ACTOR_DEFAULT_MISSING_STATUS_CODE,
   ACTOR_DEFAULT_MISSING_CODE,
   ACTOR_DEFAULT_MISSING_MESSAGE,
-} from "./actor";
+} from "./actor.js";
 export {
   API_ROUTE_METHOD,
   healthLiveContract,
@@ -12,7 +12,7 @@ export {
   healthRoutes,
   metricsContract,
   metricsRoutes,
-} from "./routes";
+} from "./routes.js";
 export {
   DEFAULT_SECRET_PATH_ENV_VAR,
   DEFAULT_SECRET_PATH,
@@ -21,9 +21,9 @@ export {
   RUNTIME_DEPENDENCY_SECRETS_MANAGER,
   RUNTIME_DEPENDENCY_SECRETS_SNAPSHOT,
   RUNTIME_DEPENDENCY_SECRETS_ENV,
-} from "./secrets";
+} from "./secrets.js";
 export {
   SERVICE_DECORATOR_PHASE,
   SERVICE_DECORATOR_TRANSFORM_ERROR_CODE,
   SERVICE_DECORATOR_SAFE_ERROR_MESSAGE,
-} from "./service";
+} from "./service.js";

@@ -10,24 +10,24 @@ import {
   mergeWithProcessEnv,
   parseSecretsFile,
   resolveSecretPath,
-} from "../functions/secrets";
+} from "../functions/secrets.js";
 import type {
   SecretLogger,
   SecretManagerOptions,
   SecretRotation,
   SecretSnapshot,
-} from "../contracts";
+} from "../contracts/index.js";
 import {
   DEFAULT_SECRET_PATH,
   DEFAULT_SECRET_PATH_ENV_VAR,
   DEFAULT_WATCH_DEBOUNCE_MS,
-} from "../tokens";
+} from "../tokens/index.js";
 export type {
   SecretSnapshot,
   SecretRotation,
   SecretLogger,
   SecretManagerOptions,
-} from "../contracts";
+} from "../contracts/index.js";
 
 type SecretRotationListener = (rotation: SecretRotation) => void;
 

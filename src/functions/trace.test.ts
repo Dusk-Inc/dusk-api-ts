@@ -2,8 +2,8 @@ import express from "express";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
 import type { Request, Response } from "express";
-import { traceMiddleware } from "./trace";
-import { getCorrelationId } from "./context";
+import { traceMiddleware } from "./trace.js";
+import { getCorrelationId } from "./context.js";
 
 const buildApp = () => {
   const app = express();

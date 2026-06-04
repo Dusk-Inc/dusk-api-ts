@@ -1,7 +1,7 @@
-import "./other/express";
+import "./other/express.js";
 
-export * from "./modules";
-export * from "./functions";
-export * from "./contracts";
-export * from "./tokens";
-export * from "./routes";
+export * from "./modules/index.js";
+export * from "./functions/index.js";
+export * from "./contracts/index.js";
+export * from "./tokens/index.js";
+export * from "./routes/index.js";

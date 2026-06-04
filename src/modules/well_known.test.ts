@@ -1,6 +1,6 @@
 import express from "express";
 import request from "supertest";
-import { WellKnownRouter } from "./well_known";
+import { WellKnownRouter } from "./well_known.js";
 
 type WellKnownConfig = ConstructorParameters<typeof WellKnownRouter>[0];
 

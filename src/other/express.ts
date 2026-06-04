@@ -1,4 +1,4 @@
-import type { AuditLevel, AuditPayload } from "../contracts";
+import type { AuditLevel, AuditPayload } from "../contracts/index.js";
 
 declare global {
   namespace Express {

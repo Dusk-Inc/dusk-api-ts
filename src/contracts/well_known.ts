@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { RouteMethod } from "./routes";
+import { RouteMethod } from "./routes.js";
 
 export type DiscoveryModel = {
   id: string;

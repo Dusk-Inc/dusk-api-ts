@@ -1,7 +1,7 @@
 import express from "express";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
-import { HealthRouter } from "./health";
+import { HealthRouter } from "./health.js";
 
 const buildApp = (readiness?: () => boolean | Promise<boolean>) => {
   const app = express();

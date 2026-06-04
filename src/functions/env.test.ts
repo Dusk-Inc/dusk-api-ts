@@ -1,4 +1,4 @@
-import { parseEnv } from "./env";
+import { parseEnv } from "./env.js";
 
 const buildEnv = (overrides: Partial<NodeJS.ProcessEnv> = {}) => {
   return {
