@@ -50,6 +50,8 @@ lerna-debug.log*
 *.key
 *.crt
 secrets/
+.playwright-mcp
+.tmp
 
 # Editor & OS
 .idea/
