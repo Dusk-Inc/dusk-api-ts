@@ -61,24 +61,28 @@ export class AppManager {
     );
     this.app.use(auditMiddleware);
 
-    this.app.use(express.json());
+    this.app.use(config.jsonLimit ? express.json({ limit: config.jsonLimit }) : express.json());
     this.app.use(new HealthRouter({ readiness: config.readiness }).router);
     this.app.use(new MetricsRouter().router);
   }
 
+  /** Registers a runtime plugin, returning the manager so registrations chain. */
   use(plugin: RuntimePlugin): AppManager {
     this.runtime.use(plugin);
     return this;
   }
 
+  /** Reads one dependency a started plugin published, undefined before it has. */
   getDependency<TValue>(key: string): TValue | undefined {
     return this.runtime.getDependency<TValue>(key);
   }
 
+  /** Starts every registered plugin, which a service awaits before it listens. */
   async startRuntime(): Promise<void> {
     await this.runtime.start();
   }
 
+  /** Stops every registered plugin, so a stopping service releases what it held. */
   async stopRuntime(): Promise<void> {
     await this.runtime.stop();
   }
