@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "pnpm -C ../../../.. jest --config jest.config.js --testPathPatterns repos/libs/dusk-api-ts"
+    "test": "pnpm --dir ../../.. exec jest --config jest.config.js --testPathPatterns repos/libs/dusk-api-ts"
   },
   "dependencies": {
     "@dusk/dusk-core": "workspace:*",
